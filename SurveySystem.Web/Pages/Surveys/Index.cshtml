@@ -1,0 +1,76 @@
+﻿@page
+@model SurveySystem.Web.Pages.Surveys.IndexModel
+@{
+    ViewData["Title"] = "Surveys";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Surveys</h1>
+        @if (User.Identity.IsAuthenticated)
+        {
+            <a asp-page="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Create New Survey
+            </a>
+        }
+    </div>
+
+    @if (!Model.Surveys.Any())
+    {
+        <div class="alert alert-info">
+            No surveys found. @(User.Identity.IsAuthenticated ? "Create your first survey!" : "Please sign in to create a survey.")
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var survey in Model.Surveys)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <h5 class="card-title">@survey.Title</h5>
+                                @if (survey.IsPublished)
+                                {
+                                    <span class="badge bg-success">Published</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Draft</span>
+                                }
+                            </div>
+                            <p class="card-text">
+                                @(string.IsNullOrEmpty(survey.Description) ? "No description" :
+                                    survey.Description.Length > 100 ? survey.Description.Substring(0, 100) + "..." : survey.Description)
+                            </p>
+                            <p class="card-text text-muted">
+                                <small>
+                                    Created by @survey.CreatedBy on @survey.CreatedAt.ToString("MMM dd, yyyy")
+                                </small>
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex justify-content-between">
+                                <a asp-page="Details" asp-route-id="@survey.Id" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                @if (Model.IsOwnerOrAdmin(survey.CreatedBy))
+                                {
+                                    <div>
+                                        <a asp-page="Edit" asp-route-id="@survey.Id" class="btn btn-outline-secondary btn-sm">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </a>
+                                        <a asp-page="Results" asp-route-id="@survey.Id" class="btn btn-outline-info btn-sm">
+                                            <i class="bi bi-bar-chart"></i> Results
+                                        </a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

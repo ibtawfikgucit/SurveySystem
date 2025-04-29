@@ -1,0 +1,22 @@
+﻿@using Microsoft.AspNetCore.Authentication
+@using Microsoft.Identity.Web
+
+<ul class="navbar-nav">
+    @if (User.Identity.IsAuthenticated)
+    {
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-light" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Hello @User.GetDisplayName()!
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" asp-area="MicrosoftIdentity" asp-page="/Account/SignedOut">Sign out</a></li>
+            </ul>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-light" asp-area="MicrosoftIdentity" asp-page="/Account/SignIn">Sign in</a>
+        </li>
+    }
+</ul>

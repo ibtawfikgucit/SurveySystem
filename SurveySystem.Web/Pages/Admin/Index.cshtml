@@ -1,0 +1,714 @@
+﻿@page
+@model SurveySystem.Web.Pages.Admin.IndexModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container mt-4">
+    <h1>Admin Dashboard</h1>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="list-group">
+                <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
+                    <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                </a>
+                <a href="#" class="list-group-item list-group-item-action" id="btn-users">
+                    <i class="bi bi-people me-2"></i> Users
+                </a>
+                <a href="#" class="list-group-item list-group-item-action" id="btn-surveys">
+                    <i class="bi bi-file-earmark-text me-2"></i> Surveys
+                </a>
+                <a href="#" class="list-group-item list-group-item-action" id="btn-audit">
+                    <i class="bi bi-journal-text me-2"></i> Audit Logs
+                </a>
+                <a href="#" class="list-group-item list-group-item-action" id="btn-settings">
+                    <i class="bi bi-gear me-2"></i> Settings
+                </a>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="dashboard-content">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card bg-primary text-white mb-4">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="card-title">Users</h5>
+                                        <h2 class="mb-0">@Model.TotalUsers</h2>
+                                    </div>
+                                    <i class="bi bi-people" style="font-size: 3rem;"></i>
+                                </div>
+                            </div>
+                            <div class="card-footer d-flex align-items-center justify-content-between">
+                                <a class="small text-white stretched-link" href="#">View Details</a>
+                                <div class="small text-white"><i class="bi bi-arrow-right"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-success text-white mb-4">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="card-title">Surveys</h5>
+                                        <h2 class="mb-0">@Model.TotalSurveys</h2>
+                                    </div>
+                                    <i class="bi bi-file-earmark-text" style="font-size: 3rem;"></i>
+                                </div>
+                            </div>
+                            <div class="card-footer d-flex align-items-center justify-content-between">
+                                <a class="small text-white stretched-link" href="#">View Details</a>
+                                <div class="small text-white"><i class="bi bi-arrow-right"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-info text-white mb-4">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="card-title">Responses</h5>
+                                        <h2 class="mb-0">@Model.TotalResponses</h2>
+                                    </div>
+                                    <i class="bi bi-clipboard-data" style="font-size: 3rem;"></i>
+                                </div>
+                            </div>
+                            <div class="card-footer d-flex align-items-center justify-content-between">
+                                <a class="small text-white stretched-link" href="#">View Details</a>
+                                <div class="small text-white"><i class="bi bi-arrow-right"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="bi bi-activity me-1"></i>
+                        System Activity
+                    </div>
+                    <div class="card-body">
+                        <canvas id="activityChart" width="100%" height="40"></canvas>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="bi bi-clock-history me-1"></i>
+                        Recent Audit Logs
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="auditTable">
+                                <thead>
+                                    <tr>
+                                        <th>Date/Time</th>
+                                        <th>User</th>
+                                        <th>Action</th>
+                                        <th>Entity</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var audit in Model.RecentAuditLogs)
+                                    {
+                                        <tr>
+                                            <td>@audit.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                            <td>@audit.Username</td>
+                                            <td>
+                                                <span class="badge @(audit.Action == "Create" ? "bg-success" :
+                                                                    audit.Action == "Update" ? "bg-info" :
+                                                                    audit.Action == "Delete" ? "bg-danger" : "bg-secondary")">
+                                                    @audit.Action
+                                                </span>
+                                            </td>
+                                            <td>@audit.EntityName</td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-audit-details"
+                                                        data-bs-toggle="modal" data-bs-target="#auditDetailsModal"
+                                                        data-audit-id="@audit.Id">
+                                                    <i class="bi bi-eye"></i> View
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="users-content d-none">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3>User Management</h3>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                        <i class="bi bi-person-plus"></i> Add User
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="usersTable">
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Email</th>
+                                        <th>Display Name</th>
+                                        <th>Role</th>
+                                        <th>Organization</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var user in Model.Users)
+                                    {
+                                        <tr>
+                                            <td>@user.Username</td>
+                                            <td>@user.Email</td>
+                                            <td>@user.DisplayName</td>
+                                            <td>
+                                                @if (user.IsAdmin)
+                                                {
+                                                    <span class="badge bg-danger">Administrator</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-primary">Survey Creator</span>
+                                                }
+                                            </td>
+                                            <td>@user.Organization</td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-outline-primary edit-user-btn"
+                                                        data-user-id="@user.Id" data-bs-toggle="modal" data-bs-target="#editUserModal">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-danger delete-user-btn confirm-delete"
+                                                        data-user-id="@user.Id">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="surveys-content d-none">
+                <h3>Survey Management</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="surveysTable">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Created By</th>
+                                        <th>Created</th>
+                                        <th>Status</th>
+                                        <th>Responses</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var survey in Model.Surveys)
+                                    {
+                                        <tr>
+                                            <td>@survey.Title</td>
+                                            <td>@survey.CreatedBy</td>
+                                            <td>@survey.CreatedAt.ToString("yyyy-MM-dd")</td>
+                                            <td>
+                                                @if (survey.IsPublished)
+                                                {
+                                                    <span class="badge bg-success">Published</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Draft</span>
+                                                }
+                                            </td>
+                                            <td>@(survey.ResponseCount)</td>
+                                            <td>
+                                                <a asp-page="/Surveys/Details" asp-route-id="@survey.Id" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a asp-page="/Surveys/Edit" asp-route-id="@survey.Id" class="btn btn-sm btn-outline-secondary">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <a asp-page="/Surveys/Results" asp-route-id="@survey.Id" class="btn btn-sm btn-outline-info">
+                                                    <i class="bi bi-bar-chart"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-danger confirm-delete"
+                                                        data-survey-id="@survey.Id">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="audit-content d-none">
+                <h3>Audit Logs</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="auditFilterEntity" class="form-label">Entity</label>
+                                    <select id="auditFilterEntity" class="form-select">
+                                        <option value="">All Entities</option>
+                                        <option value="User">User</option>
+                                        <option value="Survey">Survey</option>
+                                        <option value="Question">Question</option>
+                                        <option value="SurveyResponse">SurveyResponse</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="auditFilterAction" class="form-label">Action</label>
+                                    <select id="auditFilterAction" class="form-select">
+                                        <option value="">All Actions</option>
+                                        <option value="Create">Create</option>
+                                        <option value="Update">Update</option>
+                                        <option value="Delete">Delete</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="auditFilterDate" class="form-label">Date Range</label>
+                                    <select id="auditFilterDate" class="form-select">
+                                        <option value="today">Today</option>
+                                        <option value="yesterday">Yesterday</option>
+                                        <option value="week">Last 7 days</option>
+                                        <option value="month">Last 30 days</option>
+                                        <option value="all" selected>All Time</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="auditLogsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Date/Time</th>
+                                        <th>User</th>
+                                        <th>Action</th>
+                                        <th>Entity</th>
+                                        <th>Entity ID</th>
+                                        <th>IP Address</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var audit in Model.AuditLogs)
+                                    {
+                                        <tr>
+                                            <td>@audit.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                            <td>@audit.Username</td>
+                                            <td>
+                                                <span class="badge @(audit.Action == "Create" ? "bg-success" :
+                                                                    audit.Action == "Update" ? "bg-info" :
+                                                                    audit.Action == "Delete" ? "bg-danger" : "bg-secondary")">
+                                                    @audit.Action
+                                                </span>
+                                            </td>
+                                            <td>@audit.EntityName</td>
+                                            <td>@audit.EntityId</td>
+                                            <td>@audit.IpAddress</td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-outline-primary view-audit-details"
+                                                        data-bs-toggle="modal" data-bs-target="#auditDetailsModal"
+                                                        data-audit-id="@audit.Id">
+                                                    <i class="bi bi-eye"></i> View
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-content d-none">
+                <h3>System Settings</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <form id="settingsForm">
+                            <div class="mb-3">
+                                <h5>General Settings</h5>
+                                <hr>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="siteName" class="form-label">Site Name</label>
+                                <input type="text" class="form-control" id="siteName" value="Survey System">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="contactEmail" class="form-label">Contact Email</label>
+                                <input type="email" class="form-control" id="contactEmail" value="admin@example.com">
+                            </div>
+
+                            <div class="mb-3">
+                                <h5>Survey Settings</h5>
+                                <hr>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="allowAnonymousByDefault" checked>
+                                    <label class="form-check-label" for="allowAnonymousByDefault">Allow anonymous responses by default</label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="requireAuthenticationByDefault">
+                                    <label class="form-check-label" for="requireAuthenticationByDefault">Require authentication by default</label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="allowMultipleResponsesByDefault" checked>
+                                    <label class="form-check-label" for="allowMultipleResponsesByDefault">Allow multiple responses by default</label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="defaultSurveyExpiration" class="form-label">Default Survey Expiration (days)</label>
+                                <input type="number" class="form-control" id="defaultSurveyExpiration" value="30">
+                            </div>
+
+                            <div class="mb-3">
+                                <h5>Security Settings</h5>
+                                <hr>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="enableAuditLogging" checked>
+                                    <label class="form-check-label" for="enableAuditLogging">Enable audit logging</label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="auditRetentionPeriod" class="form-label">Audit Log Retention Period (days)</label>
+                                <input type="number" class="form-control" id="auditRetentionPeriod" value="90">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Save Settings</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addUserModalLabel">Add User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm">
+                    <div class="mb-3">
+                        <label for="newUsername" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="newUsername" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="newEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newDisplayName" class="form-label">Display Name</label>
+                        <input type="text" class="form-control" id="newDisplayName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="newPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newOrganization" class="form-label">Organization</label>
+                        <input type="text" class="form-control" id="newOrganization">
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="newIsAdmin">
+                            <label class="form-check-label" for="newIsAdmin">
+                                Administrator
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="newIsActiveDirectoryUser">
+                            <label class="form-check-label" for="newIsActiveDirectoryUser">
+                                Active Directory User
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveUserBtn">Add User</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm">
+                    <input type="hidden" id="editUserId">
+                    <div class="mb-3">
+                        <label for="editUsername" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="editUsername" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="editEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editDisplayName" class="form-label">Display Name</label>
+                        <input type="text" class="form-control" id="editDisplayName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editOrganization" class="form-label">Organization</label>
+                        <input type="text" class="form-control" id="editOrganization">
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="editIsAdmin">
+                            <label class="form-check-label" for="editIsAdmin">
+                                Administrator
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="updateUserBtn">Update User</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Audit Details Modal -->
+<div class="modal fade" id="auditDetailsModal" tabindex="-1" aria-labelledby="auditDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="auditDetailsModalLabel">Audit Log Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="auditDetails">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>User:</strong> <span id="auditUser"></span></p>
+                            <p><strong>Action:</strong> <span id="auditAction"></span></p>
+                            <p><strong>Entity:</strong> <span id="auditEntity"></span></p>
+                            <p><strong>Entity ID:</strong> <span id="auditEntityId"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Date/Time:</strong> <span id="auditTimestamp"></span></p>
+                            <p><strong>IP Address:</strong> <span id="auditIpAddress"></span></p>
+                        </div>
+                    </div>
+
+                    <h6>Changes</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Property</th>
+                                    <th>Old Value</th>
+                                    <th>New Value</th>
+                                </tr>
+                            </thead>
+                            <tbody id="auditChangesTable">
+                                <!-- Changes will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTables
+            $('#usersTable').DataTable();
+            $('#surveysTable').DataTable();
+            $('#auditLogsTable').DataTable();
+            $('#auditTable').DataTable({
+                order: [[0, 'desc']],
+                pageLength: 5,
+                lengthMenu: [5, 10, 25, 50]
+            });
+
+            // Side navigation
+            $('#btn-users').click(function(e) {
+                e.preventDefault();
+                $('.list-group-item').removeClass('active');
+                $(this).addClass('active');
+                $('.dashboard-content, .surveys-content, .audit-content, .settings-content').addClass('d-none');
+                $('.users-content').removeClass('d-none');
+            });
+
+            $('#btn-surveys').click(function(e) {
+                e.preventDefault();
+                $('.list-group-item').removeClass('active');
+                $(this).addClass('active');
+                $('.dashboard-content, .users-content, .audit-content, .settings-content').addClass('d-none');
+                $('.surveys-content').removeClass('d-none');
+            });
+
+            $('#btn-audit').click(function(e) {
+                e.preventDefault();
+                $('.list-group-item').removeClass('active');
+                $(this).addClass('active');
+                $('.dashboard-content, .users-content, .surveys-content, .settings-content').addClass('d-none');
+                $('.audit-content').removeClass('d-none');
+            });
+
+            $('#btn-settings').click(function(e) {
+                e.preventDefault();
+                $('.list-group-item').removeClass('active');
+                $(this).addClass('active');
+                $('.dashboard-content, .users-content, .surveys-content, .audit-content').addClass('d-none');
+                $('.settings-content').removeClass('d-none');
+            });
+
+            // Activity Chart
+            var ctx = document.getElementById('activityChart').getContext('2d');
+            var activityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: @Html.Raw(Json.Serialize(Model.ActivityDates)),
+                    datasets: [
+                        {
+                            label: 'Surveys Created',
+                            data: @Html.Raw(Json.Serialize(Model.SurveysCreated)),
+                            borderColor: 'rgba(40, 167, 69, 1)',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Responses Received',
+                            data: @Html.Raw(Json.Serialize(Model.ResponsesReceived)),
+                            borderColor: 'rgba(23, 162, 184, 1)',
+                            backgroundColor: 'rgba(23, 162, 184, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+
+            // User Management
+            $('#saveUserBtn').click(function() {
+                // In a real app, this would save to the API
+                alert('User added successfully!');
+                $('#addUserModal').modal('hide');
+            });
+
+            $('#updateUserBtn').click(function() {
+                // In a real app, this would update via the API
+                alert('User updated successfully!');
+                $('#editUserModal').modal('hide');
+            });
+
+            $('.edit-user-btn').click(function() {
+                var userId = $(this).data('user-id');
+                // In a real app, this would load user data from the API
+                $('#editUserId').val(userId);
+            });
+
+            $('.delete-user-btn').click(function() {
+                var userId = $(this).data('user-id');
+                // In a real app, this would delete via the API
+                confirm('Are you sure you want to delete this user?');
+            });
+
+            // Audit Log Details
+            $('.view-audit-details').click(function() {
+                var auditId = $(this).data('audit-id');
+                // In a real app, this would load audit details from the API
+
+                // Simulate loading the details (in real app, this would be API data)
+                $('#auditUser').text('john.doe@example.com');
+                $('#auditAction').text('Update');
+                $('#auditEntity').text('Survey');
+                $('#auditEntityId').text('7f8d9a6c-5b4e-3f2d-1a9b-8c7d6e5f4a3b');
+                $('#auditTimestamp').text('2023-03-15 14:35:22');
+                $('#auditIpAddress').text('192.168.1.1');
+
+                // Sample changes
+                var changesHtml = '';
+                changesHtml += '<tr><td>Title</td><td>Customer Feedback</td><td>Customer Satisfaction Survey</td></tr>';
+                changesHtml += '<tr><td>Description</td><td>Survey about our service</td><td>Comprehensive survey about customer satisfaction with our services</td></tr>';
+                changesHtml += '<tr><td>IsPublished</td><td>false</td><td>true</td></tr>';
+
+                $('#auditChangesTable').html(changesHtml);
+            });
+
+            // Settings Form
+            $('#settingsForm').submit(function(e) {
+                e.preventDefault();
+                // In a real app, this would save settings via the API
+                alert('Settings saved successfully!');
+            });
+        });
+    </script>
+}

@@ -1,0 +1,86 @@
+﻿@page
+@model SurveySystem.Web.Pages.Surveys.CreateModel
+@{
+    ViewData["Title"] = "Create Survey";
+}
+
+<div class="container mt-4">
+    <h1>Create New Survey</h1>
+    <hr />
+
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Survey Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="Survey.Title" class="form-label">Title</label>
+                    <input asp-for="Survey.Title" class="form-control" />
+                    <span asp-validation-for="Survey.Title" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Survey.Description" class="form-label">Description</label>
+                    <textarea asp-for="Survey.Description" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Survey.Description" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Survey.StartDate" class="form-label">Start Date</label>
+                            <input asp-for="Survey.StartDate" class="form-control" type="datetime-local" />
+                            <span asp-validation-for="Survey.StartDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Survey.EndDate" class="form-label">End Date (Optional)</label>
+                            <input asp-for="Survey.EndDate" class="form-control" type="datetime-local" />
+                            <span asp-validation-for="Survey.EndDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-check mb-3">
+                            <input asp-for="Survey.IsPublished" class="form-check-input" />
+                            <label asp-for="Survey.IsPublished" class="form-check-label">Published</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-check mb-3">
+                            <input asp-for="Survey.AllowAnonymous" class="form-check-input" />
+                            <label asp-for="Survey.AllowAnonymous" class="form-check-label">Allow Anonymous</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-check mb-3">
+                            <input asp-for="Survey.RequiresAuthentication" class="form-check-input" />
+                            <label asp-for="Survey.RequiresAuthentication" class="form-check-label">Requires Authentication</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-check mb-3">
+                            <input asp-for="Survey.AllowMultipleResponses" class="form-check-input" />
+                            <label asp-for="Survey.AllowMultipleResponses" class="form-check-label">Allow Multiple Responses</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a asp-page="Index" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Create Survey</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

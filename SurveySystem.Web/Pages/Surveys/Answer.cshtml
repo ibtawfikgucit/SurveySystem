@@ -1,0 +1,187 @@
+﻿@page "{id:guid}"
+@model SurveySystem.Web.Pages.Surveys.AnswerModel
+@{
+    ViewData["Title"] = Model.Survey.Title;
+}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h1 class="h3 mb-0">@Model.Survey.Title</h1>
+        </div>
+        <div class="card-body">
+            @if (!string.IsNullOrEmpty(Model.Survey.Description))
+            {
+                <div class="mb-4">
+                    <p>@Model.Survey.Description</p>
+                </div>
+                <hr />
+            }
+
+            @if (Model.ErrorMessage != null)
+            {
+                <div class="alert alert-danger">
+                    @Model.ErrorMessage
+                </div>
+            }
+            else if (Model.SuccessMessage != null)
+            {
+                <div class="alert alert-success">
+                    @Model.SuccessMessage
+                    <div class="mt-3">
+                        <a asp-page="Index" class="btn btn-primary">Return to Surveys</a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <form method="post" id="surveyForm">
+                    <input type="hidden" asp-for="SurveyId" />
+                    <input type="hidden" asp-for="StartTime" />
+
+                    @if (!User.Identity.IsAuthenticated && Model.Survey.AllowAnonymous && !Model.Survey.RequiresAuthentication)
+                    {
+                        <div class="mb-4">
+                            <div class="mb-3">
+                                <label asp-for="RespondentEmail" class="form-label">Your Email (Optional)</label>
+                                <input asp-for="RespondentEmail" class="form-control" />
+                                <span asp-validation-for="RespondentEmail" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <hr />
+                    }
+
+                    @for (int i = 0; i < Model.Questions.Count; i++)
+                    {
+                        var question = Model.Questions[i];
+                        <div class="card mb-4 question-card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    @question.Text
+                                    @if (question.IsRequired)
+                                    {
+                                        <span class="text-danger">*</span>
+                                    }
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                @if (!string.IsNullOrEmpty(question.Description))
+                                {
+                                    <p class="text-muted mb-3">@question.Description</p>
+                                }
+
+                                <input type="hidden" name="Responses[@i].QuestionId" value="@question.Id" />
+
+                                @switch (question.Type)
+                                {
+                                    case "ShortAnswer":
+                                        <div class="mb-3">
+                                            <input type="text" class="form-control" name="Responses[@i].TextResponse"
+                                            @(question.IsRequired ? "required" : "") />
+                                        </div>
+                                        break;
+
+                                    case "LongAnswer":
+                                        <div class="mb-3">
+                                            <textarea class="form-control" name="Responses[@i].TextResponse" rows="3"
+                                            @(question.IsRequired ? "required" : "")></textarea>
+                                        </div>
+                                        break;
+
+                                    case "SingleChoice":
+                                        @foreach (var option in question.Options)
+                                        {
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="radio"
+                                                       name="Responses[@i].SelectedOptionId" value="@option.Id"
+                                                       id="option_@option.Id" @(question.IsRequired ? "required" : "") />
+                                                <label class="form-check-label" for="option_@option.Id">
+                                                    @option.Text
+                                                </label>
+                                            </div>
+                                        }
+                                        break;
+
+                                    case "MultipleChoice":
+                                        @foreach (var option in question.Options)
+                                        {
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox"
+                                                       name="Responses[@i].SelectedOptionIds" value="@option.Id"
+                                                       id="option_@option.Id" />
+                                                <label class="form-check-label" for="option_@option.Id">
+                                                    @option.Text
+                                                </label>
+                                            </div>
+                                        }
+                                        break;
+
+                                    case "Rating":
+                                        <div class="rating">
+                                            @for (int r = 1; r <= 5; r++)
+                                            {
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio"
+                                                           name="Responses[@i].NumericResponse" value="@r"
+                                                           id="rating_@(question.Id)_@r" @(question.IsRequired ? "required" : "") />
+                                                    <label class="form-check-label" for="rating_@(question.Id)_@r">@r</label>
+                                                </div>
+                                            }
+                                        </div>
+                                        break;
+
+                                    case "Date":
+                                        <div class="mb-3">
+                                            <input type="date" class="form-control" name="Responses[@i].DateResponse"
+                                            @(question.IsRequired ? "required" : "") />
+                                        </div>
+                                        break;
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a asp-page="Details" asp-route-id="@Model.SurveyId" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Submit Response</button>
+                    </div>
+                </form>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function() {
+            // Client-side validation for required questions
+            $("#surveyForm").submit(function(event) {
+                var isValid = true;
+
+                // Validate MultipleChoice questions (checkboxes)
+                $(".question-card").each(function() {
+                    var card = $(this);
+                    var isRequired = card.find(".card-header h5 .text-danger").length > 0;
+
+                    if (isRequired) {
+                        var checkboxes = card.find("input[type='checkbox']");
+                        if (checkboxes.length > 0 && !checkboxes.is(":checked")) {
+                            isValid = false;
+                            if (!card.find(".text-danger.validation-message").length) {
+                                card.find(".card-body").append('<div class="text-danger validation-message mt-2">Please select at least one option.</div>');
+                            }
+                        } else {
+                            card.find(".text-danger.validation-message").remove();
+                        }
+                    }
+                });
+
+                if (!isValid) {
+                    event.preventDefault();
+                }
+            });
+        });
+    </script>
+}

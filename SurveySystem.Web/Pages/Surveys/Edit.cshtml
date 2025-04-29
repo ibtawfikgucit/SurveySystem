@@ -1,0 +1,534 @@
+﻿@page "{id:guid}"
+@model SurveySystem.Web.Pages.Surveys.EditModel
+@{
+    ViewData["Title"] = "Edit Survey";
+}
+
+<div class="container mt-4">
+    <h1>Edit Survey: @Model.Survey.Title</h1>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-8">
+            <form method="post">
+                <input type="hidden" asp-for="Survey.Id" />
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Survey Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="Survey.Title" class="form-label">Title</label>
+                            <input asp-for="Survey.Title" class="form-control" />
+                            <span asp-validation-for="Survey.Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Survey.Description" class="form-label">Description</label>
+                            <textarea asp-for="Survey.Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Survey.Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Survey.StartDate" class="form-label">Start Date</label>
+                                    <input asp-for="Survey.StartDate" class="form-control" type="datetime-local" />
+                                    <span asp-validation-for="Survey.StartDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Survey.EndDate" class="form-label">End Date (Optional)</label>
+                                    <input asp-for="Survey.EndDate" class="form-control" type="datetime-local" />
+                                    <span asp-validation-for="Survey.EndDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-check mb-3">
+                                    <input asp-for="Survey.IsPublished" class="form-check-input" />
+                                    <label asp-for="Survey.IsPublished" class="form-check-label">Published</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check mb-3">
+                                    <input asp-for="Survey.AllowAnonymous" class="form-check-input" />
+                                    <label asp-for="Survey.AllowAnonymous" class="form-check-label">Allow Anonymous</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check mb-3">
+                                    <input asp-for="Survey.RequiresAuthentication" class="form-check-input" />
+                                    <label asp-for="Survey.RequiresAuthentication" class="form-check-label">Requires Authentication</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check mb-3">
+                                    <input asp-for="Survey.AllowMultipleResponses" class="form-check-input" />
+                                    <label asp-for="Survey.AllowMultipleResponses" class="form-check-label">Allow Multiple Responses</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a asp-page="Index" class="btn btn-outline-secondary">Back to List</a>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Questions</h5>
+                    <a href="javascript:void(0)" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addQuestionModal">
+                        <i class="bi bi-plus"></i> Add
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (!Model.Questions.Any())
+                    {
+                        <div class="alert alert-info">
+                            No questions added to this survey yet.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="list-group question-list" id="questionList">
+                            @foreach (var question in Model.Questions)
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-center"
+                                     data-id="@question.Id" data-order="@question.DisplayOrder">
+                                    <div class="ms-2 me-auto">
+                                        <div class="fw-bold">@question.Text</div>
+                                        <small>@question.Type | @(question.IsRequired ? "Required" : "Optional")</small>
+                                    </div>
+                                    <div>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary edit-question-btn"
+                                                data-id="@question.Id" data-bs-toggle="modal" data-bs-target="#editQuestionModal">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger delete-question-btn"
+                                                data-id="@question.Id">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Total: @Model.Questions.Count() questions</span>
+                        <a asp-page="Preview" asp-route-id="@Model.Survey.Id" class="btn btn-sm btn-outline-info">
+                            <i class="bi bi-eye"></i> Preview
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Survey Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a asp-page="Results" asp-route-id="@Model.Survey.Id" class="btn btn-outline-info">
+                            <i class="bi bi-bar-chart"></i> View Results
+                        </a>
+                        <a href="#" class="btn btn-outline-success" id="copySurveyLink">
+                            <i class="bi bi-link-45deg"></i> Copy Survey Link
+                        </a>
+                        @if (Model.IsAdmin)
+                        {
+                            <a asp-page="Delete" asp-route-id="@Model.Survey.Id" class="btn btn-outline-danger">
+                                <i class="bi bi-trash"></i> Delete Survey
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Question Modal -->
+<div class="modal fade" id="addQuestionModal" tabindex="-1" aria-labelledby="addQuestionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addQuestionModalLabel">Add Question</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addQuestionForm">
+                    <input type="hidden" id="surveyId" value="@Model.Survey.Id" />
+
+                    <div class="mb-3">
+                        <label for="questionText" class="form-label">Question Text</label>
+                        <input type="text" class="form-control" id="questionText" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="questionDescription" class="form-label">Description (Optional)</label>
+                        <textarea class="form-control" id="questionDescription" rows="2"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="questionType" class="form-label">Question Type</label>
+                                <select class="form-select" id="questionType" required>
+                                    <option value="ShortAnswer">Short Answer</option>
+                                    <option value="LongAnswer">Long Answer</option>
+                                    <option value="SingleChoice">Single Choice</option>
+                                    <option value="MultipleChoice">Multiple Choice</option>
+                                    <option value="Rating">Rating</option>
+                                    <option value="Date">Date</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input" type="checkbox" id="isRequired" checked>
+                                    <label class="form-check-label" for="isRequired">
+                                        Required question
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="optionsContainer" class="d-none">
+                        <div class="mb-3">
+                            <label class="form-label">Options</label>
+                            <div id="optionsList"></div>
+                            <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="addOptionBtn">
+                                <i class="bi bi-plus-circle"></i> Add Option
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveQuestionBtn">Save Question</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Question Modal -->
+<div class="modal fade" id="editQuestionModal" tabindex="-1" aria-labelledby="editQuestionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editQuestionModalLabel">Edit Question</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editQuestionForm">
+                    <input type="hidden" id="editQuestionId" />
+
+                    <div class="mb-3">
+                        <label for="editQuestionText" class="form-label">Question Text</label>
+                        <input type="text" class="form-control" id="editQuestionText" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="editQuestionDescription" class="form-label">Description (Optional)</label>
+                        <textarea class="form-control" id="editQuestionDescription" rows="2"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="editQuestionType" class="form-label">Question Type</label>
+                                <input type="text" class="form-control" id="editQuestionType" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input" type="checkbox" id="editIsRequired">
+                                    <label class="form-check-label" for="editIsRequired">
+                                        Required question
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="editOptionsContainer" class="d-none">
+                        <div class="mb-3">
+                            <label class="form-label">Options</label>
+                            <div id="editOptionsList"></div>
+                            <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="editAddOptionBtn">
+                                <i class="bi bi-plus-circle"></i> Add Option
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="updateQuestionBtn">Update Question</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // JavaScript for handling questions and options
+        $(document).ready(function () {
+            // Show/hide options based on question type
+            $('#questionType').change(function () {
+                var type = $(this).val();
+                if (type === 'SingleChoice' || type === 'MultipleChoice') {
+                    $('#optionsContainer').removeClass('d-none');
+                    if ($('#optionsList .option-item').length === 0) {
+                        addOption();
+                        addOption();
+                    }
+                } else {
+                    $('#optionsContainer').addClass('d-none');
+                }
+            });
+
+            // Add option
+            $('#addOptionBtn').click(function () {
+                addOption();
+            });
+
+            function addOption() {
+                var optionHtml = `
+                    <div class="input-group mb-2 option-item">
+                        <input type="text" class="form-control option-text" placeholder="Option text" required>
+                        <button class="btn btn-outline-danger remove-option-btn" type="button">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                `;
+                $('#optionsList').append(optionHtml);
+            }
+
+            // Remove option
+            $(document).on('click', '.remove-option-btn', function () {
+                $(this).closest('.option-item').remove();
+            });
+
+            // Save question
+            $('#saveQuestionBtn').click(function () {
+                var question = {
+                    text: $('#questionText').val(),
+                    description: $('#questionDescription').val(),
+                    type: $('#questionType').val(),
+                    isRequired: $('#isRequired').is(':checked'),
+                    options: []
+                };
+
+                if (question.type === 'SingleChoice' || question.type === 'MultipleChoice') {
+                    $('.option-text').each(function (index) {
+                        question.options.push({
+                            text: $(this).val(),
+                            displayOrder: index + 1
+                        });
+                    });
+                }
+
+                // Save via API
+                $.ajax({
+                    url: '/api/surveys/' + $('#surveyId').val() + '/questions',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(question),
+                    success: function (result) {
+                        $('#addQuestionModal').modal('hide');
+                        location.reload();
+                    },
+                    error: function (error) {
+                        alert('Error saving question: ' + error.responseText);
+                    }
+                });
+            });
+
+            // Edit question
+            $('.edit-question-btn').click(function () {
+                var questionId = $(this).data('id');
+
+                // Get question data via API
+                $.ajax({
+                    url: '/api/surveys/' + $('#surveyId').val() + '/questions/' + questionId,
+                    type: 'GET',
+                    success: function (question) {
+                        $('#editQuestionId').val(question.id);
+                        $('#editQuestionText').val(question.text);
+                        $('#editQuestionDescription').val(question.description);
+                        $('#editQuestionType').val(question.type);
+                        $('#editIsRequired').prop('checked', question.isRequired);
+
+                        // Handle options
+                        $('#editOptionsList').empty();
+                        if (question.type === 'SingleChoice' || question.type === 'MultipleChoice') {
+                            $('#editOptionsContainer').removeClass('d-none');
+
+                            if (question.options && question.options.length > 0) {
+                                question.options.forEach(function (option) {
+                                    var optionHtml = `
+                                        <div class="input-group mb-2 option-item">
+                                            <input type="hidden" class="option-id" value="${option.id}">
+                                            <input type="text" class="form-control option-text" value="${option.text}" required>
+                                            <button class="btn btn-outline-danger remove-option-btn" type="button">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+                                        </div>
+                                    `;
+                                    $('#editOptionsList').append(optionHtml);
+                                });
+                            }
+                        } else {
+                            $('#editOptionsContainer').addClass('d-none');
+                        }
+                    },
+                    error: function (error) {
+                        alert('Error loading question: ' + error.responseText);
+                    }
+                });
+            });
+
+            // Add option in edit mode
+            $('#editAddOptionBtn').click(function () {
+                var optionHtml = `
+                    <div class="input-group mb-2 option-item">
+                        <input type="hidden" class="option-id" value="">
+                        <input type="text" class="form-control option-text" placeholder="Option text" required>
+                        <button class="btn btn-outline-danger remove-option-btn" type="button">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                `;
+                $('#editOptionsList').append(optionHtml);
+            });
+
+            // Update question
+            $('#updateQuestionBtn').click(function () {
+                var questionId = $('#editQuestionId').val();
+                var question = {
+                    id: questionId,
+                    text: $('#editQuestionText').val(),
+                    description: $('#editQuestionDescription').val(),
+                    isRequired: $('#editIsRequired').is(':checked'),
+                    options: []
+                };
+
+                var questionType = $('#editQuestionType').val();
+                if (questionType === 'SingleChoice' || questionType === 'MultipleChoice') {
+                    $('#editOptionsList .option-item').each(function (index) {
+                        var optionId = $(this).find('.option-id').val();
+                        var optionText = $(this).find('.option-text').val();
+
+                        var option = {
+                            text: optionText,
+                            displayOrder: index + 1
+                        };
+
+                        if (optionId) {
+                            option.id = optionId;
+                        }
+
+                        question.options.push(option);
+                    });
+                }
+
+                // Update via API
+                $.ajax({
+                    url: '/api/surveys/' + $('#surveyId').val() + '/questions/' + questionId,
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(question),
+                    success: function (result) {
+                        $('#editQuestionModal').modal('hide');
+                        location.reload();
+                    },
+                    error: function (error) {
+                        alert('Error updating question: ' + error.responseText);
+                    }
+                });
+            });
+
+            // Delete question
+            $('.delete-question-btn').click(function () {
+                if (confirm('Are you sure you want to delete this question?')) {
+                    var questionId = $(this).data('id');
+
+                    // Delete via API
+                    $.ajax({
+                        url: '/api/surveys/' + $('#surveyId').val() + '/questions/' + questionId,
+                        type: 'DELETE',
+                        success: function () {
+                            location.reload();
+                        },
+                        error: function (error) {
+                            alert('Error deleting question: ' + error.responseText);
+                        }
+                    });
+                }
+            });
+
+            // Copy survey link
+            $('#copySurveyLink').click(function (e) {
+                e.preventDefault();
+                var surveyUrl = window.location.origin + '/Surveys/Answer/' + $('#surveyId').val();
+
+                navigator.clipboard.writeText(surveyUrl).then(function() {
+                    alert('Survey link copied to clipboard!');
+                }, function() {
+                    alert('Failed to copy survey link.');
+                });
+            });
+
+            // Make questions sortable
+            new Sortable(document.getElementById('questionList'), {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function (evt) {
+                    updateQuestionOrder();
+                }
+            });
+
+            function updateQuestionOrder() {
+                var questions = [];
+
+                $('#questionList .list-group-item').each(function (index) {
+                    questions.push({
+                        id: $(this).data('id'),
+                        displayOrder: index + 1
+                    });
+                });
+
+                // Update order via API
+                $.ajax({
+                    url: '/api/surveys/' + $('#surveyId').val() + '/questions/reorder',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(questions),
+                    error: function (error) {
+                        console.error('Error updating question order:', error);
+                    }
+                });
+            }
+        });
+    </script>
+}

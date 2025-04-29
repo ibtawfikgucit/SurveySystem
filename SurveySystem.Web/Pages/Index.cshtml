@@ -1,0 +1,58 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="container mt-4">
+    <div class="jumbotron">
+        <h1 class="display-4">Welcome to the Survey System</h1>
+        <p class="lead">Create, manage, and analyze surveys with ease.</p>
+        <hr class="my-4">
+        <p>Get started by browsing available surveys or creating your own.</p>
+        <p class="lead">
+            <a class="btn btn-primary btn-lg" href="/Surveys" role="button">Browse Surveys</a>
+            @if (User.Identity.IsAuthenticated)
+            {
+                <a class="btn btn-success btn-lg ms-2" href="/Surveys/Create" role="button">Create Survey</a>
+            }
+        </p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-file-earmark-text"></i> Surveys</h5>
+                    <p class="card-text">Create and manage customized surveys with various question types.</p>
+                    <a href="/Surveys" class="btn btn-outline-primary">Go to Surveys</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-graph-up"></i> Analytics</h5>
+                    <p class="card-text">View response statistics and analyze survey results.</p>
+                    <a href="/Analytics" class="btn btn-outline-primary">Go to Analytics</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-gear"></i> Administration</h5>
+                    <p class="card-text">Manage users, permissions, and system settings.</p>
+                    @if (User.IsInRole("Administrator"))
+                    {
+                        <a href="/Admin" class="btn btn-outline-primary">Go to Admin</a>
+                    }
+                    else
+                    {
+                        <a href="#" class="btn btn-outline-secondary disabled">Admin access required</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

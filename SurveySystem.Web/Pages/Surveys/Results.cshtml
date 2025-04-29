@@ -1,0 +1,577 @@
+﻿@page "{id:guid}"
+@model SurveySystem.Web.Pages.Surveys.ResultsModel
+@{
+    ViewData["Title"] = "Results: " + Model.Survey.Title;
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Survey Results: @Model.Survey.Title</h1>
+        <div>
+            <a asp-page="Details" asp-route-id="@Model.Survey.Id" class="btn btn-outline-secondary">
+                <i class="bi bi-info-circle"></i> Details
+            </a>
+            <a href="javascript:void(0)" class="btn btn-outline-success" id="exportResultsBtn">
+                <i class="bi bi-file-earmark-excel"></i> Export to Excel
+            </a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Overview</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card bg-light mb-3">
+                        <div class="card-body text-center">
+                            <h3 class="display-4">@Model.TotalResponses</h3>
+                            <p class="lead">Total Responses</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light mb-3">
+                        <div class="card-body text-center">
+                            <h3 class="display-4">@Model.CompletionRate%</h3>
+                            <p class="lead">Completion Rate</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light mb-3">
+                        <div class="card-body text-center">
+                            <h3 class="display-4">@Model.AverageCompletionTime</h3>
+                            <p class="lead">Avg. Completion Time</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs" id="resultsTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary"
+                    type="button" role="tab" aria-controls="summary" aria-selected="true">
+                Summary
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="individual-tab" data-bs-toggle="tab" data-bs-target="#individual"
+                    type="button" role="tab" aria-controls="individual" aria-selected="false">
+                Individual Responses
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="resultsTabContent">
+        <div class="tab-pane fade show active" id="summary" role="tabpanel" aria-labelledby="summary-tab">
+            @if (!Model.QuestionResults.Any())
+            {
+                <div class="alert alert-info mt-4">
+                    No responses have been submitted for this survey yet.
+                </div>
+            }
+            else
+            {
+                @foreach (var questionResult in Model.QuestionResults)
+                {
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5>@questionResult.QuestionText</h5>
+                            <small class="text-muted">@questionResult.QuestionType</small>
+                        </div>
+                        <div class="card-body">
+                            @switch (questionResult.QuestionType)
+                            {
+                                case "SingleChoice":
+                                case "MultipleChoice":
+                                    <div class="chart-container" style="position: relative; height:300px; width:100%">
+                                        <canvas id="chart_@questionResult.QuestionId"></canvas>
+                                    </div>
+                                    break;
+
+                                case "Rating":
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="chart-container" style="position: relative; height:250px;">
+                                                <canvas id="chart_@questionResult.QuestionId"></canvas>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card bg-light">
+                                                <div class="card-body text-center">
+                                                    <h3 class="display-4">@questionResult.AverageRating.ToString("F1")</h3>
+                                                    <p class="lead">Average Rating</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    break;
+
+                                case "ShortAnswer":
+                                case "LongAnswer":
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Response</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @{
+                                                    var textResponses = questionResult.TextResponses.Take(10).ToList();
+                                                    for (int i = 0; i < textResponses.Count; i++)
+                                                    {
+                                                        <tr>
+                                                            <td>@(i + 1)</td>
+                                                            <td>@textResponses[i]</td>
+                                                        </tr>
+                                                    }
+
+                                                    if (questionResult.TextResponses.Count > 10)
+                                                    {
+                                                        <tr>
+                                                            <td colspan="2" class="text-center">
+                                                                <a href="javascript:void(0)" class="show-more-responses"
+                                                                   data-question-id="@questionResult.QuestionId">
+                                                                    Show more responses (showing 10 of @questionResult.TextResponses.Count)...
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    break;
+
+                                case "Date":
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Count</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var dateGroup in questionResult.DateResponses
+                                               .GroupBy(d => d.ToString("yyyy-MM-dd"))
+                                               .OrderByDescending(g => g.Count()))
+                                                {
+                                                    <tr>
+                                                        <td>@dateGroup.Key</td>
+                                                        <td>@dateGroup.Count()</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    break;
+                            }
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        <div class="tab-pane fade" id="individual" role="tabpanel" aria-labelledby="individual-tab">
+            @if (!Model.Responses.Any())
+            {
+                <div class="alert alert-info mt-4">
+                    No responses have been submitted for this survey yet.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive mt-4">
+                    <table class="table table-striped" id="responsesTable">
+                        <thead>
+                            <tr>
+                                <th>Respondent</th>
+                                <th>Submitted</th>
+                                <th>Duration</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var response in Model.Responses)
+                            {
+                                <tr>
+                                    <td>@(string.IsNullOrEmpty(response.RespondentEmail) ? "Anonymous" : response.RespondentEmail)</td>
+                                    <td>@response.CompletedAt?.ToString("MMM dd, yyyy HH:mm")</td>
+                                    <td>
+                                        @{
+                                            var duration = response.CompletedAt.HasValue ?
+                                            response.CompletedAt.Value - response.StartedAt :
+                                            TimeSpan.Zero;
+
+                                            @(duration.TotalMinutes.ToString("F1") + " min")
+                                        }
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-outline-primary view-response-btn"
+                                                data-response-id="@response.Id" data-bs-toggle="modal" data-bs-target="#responseDetailsModal">
+                                            <i class="bi bi-eye"></i> View
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Response Details Modal -->
+<div class="modal fade" id="responseDetailsModal" tabindex="-1" aria-labelledby="responseDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="responseDetailsModalLabel">Response Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="responseDetailsContainer">
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable for responses
+            $('#responsesTable').DataTable({
+                order: [[1, 'desc']], // Sort by submission date
+                lengthMenu: [10, 25, 50, 100],
+                pageLength: 25
+            });
+
+            // Initialize charts
+        @foreach (var questionResult in Model.QuestionResults.Where(q =>
+           q.QuestionType == "SingleChoice" ||
+           q.QuestionType == "MultipleChoice" ||
+           q.QuestionType == "Rating"))
+        {
+            <text>
+                    // Chart for question @questionResult.QuestionId
+                    var ctx_@questionResult.QuestionId = document.getElementById('chart_@questionResult.QuestionId').getContext('2d');
+                    var chart_@questionResult.QuestionId = new Chart(ctx_@questionResult.QuestionId, {
+                        type: '@(questionResult.QuestionType == "Rating" ? "bar" : "pie")',
+                        data: {
+                            labels: [@Html.Raw(string.Join(",", questionResult.OptionResults.Select(o => $"'{o.OptionText}'")))],
+                            datasets: [{
+                @if (questionResult.QuestionType == "Rating")
+                {
+                    <text>
+                                        label: 'Number of Responses',
+                                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                                        borderColor: 'rgba(54, 162, 235, 1)',
+                                        borderWidth: 1,
+                    </text>
+                }
+                else
+                {
+                    <text>
+                                        backgroundColor: [
+                                            'rgba(255, 99, 132, 0.7)',
+                                            'rgba(54, 162, 235, 0.7)',
+                                            'rgba(255, 206, 86, 0.7)',
+                                            'rgba(75, 192, 192, 0.7)',
+                                            'rgba(153, 102, 255, 0.7)',
+                                            'rgba(255, 159, 64, 0.7)',
+                                            'rgba(199, 199, 199, 0.7)',
+                                            'rgba(83, 102, 255, 0.7)',
+                                            'rgba(40, 159, 64, 0.7)',
+                                            'rgba(210, 199, 199, 0.7)'
+                                        ],
+                    </text>
+                }
+                                data: [@string.Join(",", questionResult.OptionResults.Select(o => o.Count))]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                @if (questionResult.QuestionType == "Rating")
+                {
+                    <text>
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                            ticks: {
+                                                precision: 0
+                                            }
+                                        }
+                                    },
+                    </text>
+                }
+                            plugins: {
+                                legend: {
+                                    position: '@(questionResult.QuestionType == "Rating" ? "top" : "right")',
+                @if (questionResult.OptionResults.Count > 8)
+                {
+                    <text>
+                                            display: false,
+                    </text>
+                }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            var label = context.label || '';
+                                            var value = context.raw;
+                                            var total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                                            var percentage = Math.round((value / total) * 100);
+                                            return label + ': ' + value + ' (' + percentage + '%)';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+            </text>
+        }
+
+            // View response details
+            $('.view-response-btn').click(function() {
+                var responseId = $(this).data('response-id');
+                $('#responseDetailsContainer').html('<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+
+                // Load response details via AJAX
+                $.ajax({
+                    url: '/api/surveys/@Model.Survey.Id/responses/' + responseId,
+                    type: 'GET',
+                    success: function(response) {
+                        var html = '<div class="mb-3">';
+                        html += '<p><strong>Respondent:</strong> ' + (response.respondentEmail || 'Anonymous') + '</p>';
+                        html += '<p><strong>Submitted:</strong> ' + new Date(response.completedAt).toLocaleString() + '</p>';
+                        html += '</div>';
+
+                        html += '<div class="table-responsive">';
+                        html += '<table class="table table-striped">';
+                        html += '<thead><tr><th>Question</th><th>Response</th></tr></thead>';
+                        html += '<tbody>';
+
+                        response.questionResponses.forEach(function(qr) {
+                            html += '<tr>';
+                            html += '<td>' + qr.questionText + '</td>';
+                            html += '<td>';
+
+                            if (qr.selectedOptionText) {
+                                html += qr.selectedOptionText;
+                            } else if (qr.textResponse) {
+                                html += qr.textResponse;
+                            } else if (qr.numericResponse !== null) {
+                                html += qr.numericResponse;
+                            } else if (qr.dateResponse) {
+                                html += new Date(qr.dateResponse).toLocaleDateString();
+                            } else {
+                                html += '<em>No response</em>';
+                            }
+
+                            html += '</td>';
+                            html += '</tr>';
+                        });
+
+                        html += '</tbody></table></div>';
+
+                        $('#responseDetailsContainer').html(html);
+                    },
+                    error: function(error) {
+                        $('#responseDetailsContainer').html('<div class="alert alert-danger">Error loading response details.</div>');
+                    }
+                });
+            });
+
+            // Export to Excel
+            $('#exportResultsBtn').click(function() {
+                // Create a workbook with multiple sheets
+                var wb = XLSX.utils.book_new();
+
+                // Sheet 1: Summary
+                var summaryData = [
+                    ['Survey', '@Model.Survey.Title'],
+                    ['Responses', '@Model.TotalResponses'],
+                    ['Completion Rate', '@Model.CompletionRate%'],
+                    ['Average Completion Time', '@Model.AverageCompletionTime']
+                ];
+                var summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+                XLSX.utils.book_append_sheet(wb, summarySheet, 'Summary');
+
+                // Sheet 2: Individual Responses
+                var responseData = [
+                    ['Respondent', 'Submitted', 'Duration']
+                ];
+
+        @foreach (var response in Model.Responses)
+        {
+            <text>
+                        responseData.push([
+                            '@(string.IsNullOrEmpty(response.RespondentEmail) ? "Anonymous" : response.RespondentEmail)',
+                            '@(response.CompletedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "")',
+                            '@(response.CompletedAt.HasValue ? (response.CompletedAt.Value - response.StartedAt).TotalMinutes.ToString("F1") + " min" : "")'
+                        ]);
+            </text>
+        }
+
+                var responseSheet = XLSX.utils.aoa_to_sheet(responseData);
+                XLSX.utils.book_append_sheet(wb, responseSheet, 'Responses');
+
+                // Sheet 3+: Question Results
+        @foreach (var questionResult in Model.QuestionResults)
+        {
+            <text>
+                        var questionData = [
+                            ['Question', '@questionResult.QuestionText.Replace("'", "\'")', 'Type', '@questionResult.QuestionType'],
+                            []
+                        ];
+
+                @switch (questionResult.QuestionType)
+                {
+                    case "SingleChoice":
+                    case "MultipleChoice":
+                        <text>
+                                        questionData.push(['Option', 'Count', 'Percentage']);
+                            @foreach (var option in questionResult.OptionResults)
+                            {
+                                <text>
+                                                questionData.push([
+                                                    '@option.OptionText.Replace("'", "\'")',
+                                    @option.Count,
+                                                    '@(option.Percentage.ToString("F1"))%'
+                                                ]);
+                                </text>
+                            }
+                        </text>
+                        break;
+
+                    case "Rating":
+                        <text>
+                                        questionData.push(['Rating', 'Count', 'Percentage']);
+                            @foreach (var option in questionResult.OptionResults)
+                            {
+                                <text>
+                                                questionData.push([
+                                                    '@option.OptionText',
+                                    @option.Count,
+                                                    '@(option.Percentage.ToString("F1"))%'
+                                                ]);
+                                </text>
+                            }
+                                        questionData.push([]);
+                                        questionData.push(['Average Rating', '@questionResult.AverageRating.ToString("F1")']);
+                        </text>
+                        break;
+
+                    case "ShortAnswer":
+                    case "LongAnswer":
+                        <text>
+                                        questionData.push(['#', 'Response']);
+                            @for (int i = 0; i < questionResult.TextResponses.Count; i++)
+                            {
+                                <text>
+                                                questionData.push([
+                                    @(i + 1),
+                                                    '@questionResult.TextResponses[i].Replace("'", "\'")'
+                                                ]);
+                                </text>
+                            }
+                        </text>
+                        break;
+
+                    case "Date":
+                        <text>
+                                        questionData.push(['Date', 'Count']);
+                            @foreach (var dateGroup in questionResult.DateResponses
+                               .GroupBy(d => d.ToString("yyyy-MM-dd"))
+                               .OrderByDescending(g => g.Count()))
+                            {
+                                <text>
+                                                questionData.push([
+                                                    '@dateGroup.Key',
+                                    @dateGroup.Count()
+                                                ]);
+                                </text>
+                            }
+                        </text>
+                        break;
+                }
+
+                        var questionSheet = XLSX.utils.aoa_to_sheet(questionData);
+                        XLSX.utils.book_append_sheet(wb, questionSheet, 'Q@(Model.QuestionResults.IndexOf(questionResult) + 1)');
+            </text>
+        }
+
+                // Save the workbook
+                XLSX.writeFile(wb, '@(Model.Survey.Title.Replace(" ", "_"))_Results.xlsx');
+            });
+
+            // Show more text responses
+            $('.show-more-responses').click(function() {
+                var questionId = $(this).data('question-id');
+                // Load all responses for this question via AJAX
+                $.ajax({
+                    url: '/api/surveys/@Model.Survey.Id/questions/' + questionId + '/responses',
+                    type: 'GET',
+                    success: function(responses) {
+                        var html = '<table class="table table-striped">';
+                        html += '<thead><tr><th>#</th><th>Response</th></tr></thead>';
+                        html += '<tbody>';
+
+                        responses.forEach(function(response, index) {
+                            html += '<tr>';
+                            html += '<td>' + (index + 1) + '</td>';
+                            html += '<td>' + response + '</td>';
+                            html += '</tr>';
+                        });
+
+                        html += '</tbody></table>';
+
+                        // Create modal with all responses
+                        var modal = $('<div class="modal fade" tabindex="-1">' +
+                            '<div class="modal-dialog modal-lg">' +
+                            '<div class="modal-content">' +
+                            '<div class="modal-header">' +
+                            '<h5 class="modal-title">All Responses</h5>' +
+                            '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>' +
+                            '</div>' +
+                            '<div class="modal-body">' + html + '</div>' +
+                            '<div class="modal-footer">' +
+                            '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>');
+
+                        modal.appendTo('body').modal('show');
+
+                        modal.on('hidden.bs.modal', function() {
+                            modal.remove();
+                        });
+                    },
+                    error: function(error) {
+                        alert('Error loading responses');
+                    }
+                });
+            });
+        });
+    </script>
+}

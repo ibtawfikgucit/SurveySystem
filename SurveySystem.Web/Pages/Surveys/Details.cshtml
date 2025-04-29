@@ -1,0 +1,167 @@
+﻿@page "{id:guid}"
+@model SurveySystem.Web.Pages.Surveys.DetailsModel
+@{
+    ViewData["Title"] = Model.Survey.Title;
+}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3 mb-0">@Model.Survey.Title</h1>
+                <div>
+                    @if (Model.Survey.IsPublished)
+                    {
+                        <span class="badge bg-success">Published</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Draft</span>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="mb-4">
+                <h5>Description</h5>
+                <p>@(string.IsNullOrEmpty(Model.Survey.Description) ? "No description provided." : Model.Survey.Description)</p>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>Details</h5>
+                    <table class="table table-sm">
+                        <tr>
+                            <th>Start Date:</th>
+                            <td>@Model.Survey.StartDate.ToString("MMM dd, yyyy HH:mm")</td>
+                        </tr>
+                        <tr>
+                            <th>End Date:</th>
+                            <td>@(Model.Survey.EndDate.HasValue ? Model.Survey.EndDate.Value.ToString("MMM dd, yyyy HH:mm") : "No end date")</td>
+                        </tr>
+                        <tr>
+                            <th>Created By:</th>
+                            <td>@Model.Survey.CreatedBy</td>
+                        </tr>
+                        <tr>
+                            <th>Created On:</th>
+                            <td>@Model.Survey.CreatedAt.ToString("MMM dd, yyyy")</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5>Settings</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Allow Anonymous Responses
+                            @if (Model.Survey.AllowAnonymous)
+                            {
+                                <span class="badge bg-success rounded-pill"><i class="bi bi-check"></i></span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger rounded-pill"><i class="bi bi-x"></i></span>
+                            }
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Requires Authentication
+                            @if (Model.Survey.RequiresAuthentication)
+                            {
+                                <span class="badge bg-success rounded-pill"><i class="bi bi-check"></i></span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger rounded-pill"><i class="bi bi-x"></i></span>
+                            }
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Allow Multiple Responses
+                            @if (Model.Survey.AllowMultipleResponses)
+                            {
+                                <span class="badge bg-success rounded-pill"><i class="bi bi-check"></i></span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger rounded-pill"><i class="bi bi-x"></i></span>
+                            }
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h5>Questions (@Model.Questions.Count())</h5>
+                @if (!Model.Questions.Any())
+                {
+                    <div class="alert alert-info">
+                        No questions have been added to this survey yet.
+                    </div>
+                }
+                else
+                {
+                    <div class="accordion" id="questionAccordion">
+                        @foreach (var question in Model.Questions)
+                        {
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading@(question.Id)">
+                                    <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#collapse@(question.Id)"
+                                            aria-expanded="false" aria-controls="collapse@(question.Id)">
+                                        <div class="d-flex w-100 justify-content-between align-items-center">
+                                            <span>@question.Text</span>
+                                            <span class="badge bg-secondary me-2">@question.Type</span>
+                                        </div>
+                                    </button>
+                                </h2>
+                                <div id="collapse@(question.Id)" class="accordion-collapse collapse"
+                                     aria-labelledby="heading@(question.Id)" data-bs-parent="#questionAccordion">
+                                    <div class="accordion-body">
+                                        @if (!string.IsNullOrEmpty(question.Description))
+                                        {
+                                            <p class="text-muted">@question.Description</p>
+                                        }
+
+                                        @if (question.Type == "SingleChoice" || question.Type == "MultipleChoice")
+                                        {
+                                            <div class="mt-2">
+                                                <strong>Options:</strong>
+                                                <ul class="list-group mt-2">
+                                                    @foreach (var option in question.Options)
+                                                    {
+                                                        <li class="list-group-item">@option.Text</li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        }
+
+                                        <div class="mt-3 text-end">
+                                            <span class="badge @(question.IsRequired ? "bg-danger" : "bg-secondary")">
+                                                @(question.IsRequired ? "Required" : "Optional")
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="d-flex justify-content-between">
+                <a asp-page="Index" class="btn btn-outline-secondary">Back to List</a>
+                <div>
+                    @if (Model.CanEdit)
+                    {
+                        <a asp-page="Edit" asp-route-id="@Model.Survey.Id" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil"></i> Edit
+                        </a>
+                    }
+                    <a asp-page="Answer" asp-route-id="@Model.Survey.Id" class="btn btn-primary ms-2">
+                        <i class="bi bi-file-earmark-text"></i> Take Survey
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
