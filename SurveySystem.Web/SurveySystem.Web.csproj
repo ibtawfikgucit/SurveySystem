@@ -2,7 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SurveySystem.Core\SurveySystem.Core.csproj" />
-    <ProjectReference Include="..\SurveySystem.Infrastructure\SurveySystem.Infrastructure.csproj" />
+    <ProjectReference Include="..\SurveySystem.Infrastructure\SurveySystem.Infrastructure.csproj" />    
     <ProjectReference Include="..\SurveySystem.Shared\SurveySystem.Shared.csproj" />
   </ItemGroup>
 
