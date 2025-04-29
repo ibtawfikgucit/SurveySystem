@@ -12,7 +12,7 @@ namespace SurveySystem.API.Controllers
 {
     [Route("api/surveys/{surveyId}/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class QuestionsController : ControllerBase
     {
         private readonly ISurveyRepository _surveyRepository;
@@ -89,7 +89,7 @@ namespace SurveySystem.API.Controllers
 
         // POST: api/surveys/5/questions
         [HttpPost]
-        [Authorize(Policy = "RequireSurveyCreatorRole")]
+        //[Authorize(Policy = "RequireSurveyCreatorRole")]
         public async Task<ActionResult<QuestionDto>> CreateQuestion(Guid surveyId, CreateQuestionDto createQuestionDto)
         {
             var survey = await _surveyRepository.GetByIdAsync(surveyId);
@@ -100,11 +100,11 @@ namespace SurveySystem.API.Controllers
             }
 
             // Check if the user is the creator or an admin
-            if (survey.CreatedByUserId.ToString() != _currentUserService.GetCurrentUserId() &&
-                !_currentUserService.IsInRole("Administrator"))
-            {
-                return Forbid();
-            }
+            //if (survey.CreatedByUserId.ToString() != _currentUserService.GetCurrentUserId() &&
+            //    !_currentUserService.IsInRole("Administrator"))
+            //{
+            //    return Forbid();
+            //}
 
             var question = new Question
             {
@@ -154,7 +154,7 @@ namespace SurveySystem.API.Controllers
 
         // PUT: api/surveys/5/questions/1
         [HttpPut("{id}")]
-        [Authorize(Policy = "RequireSurveyCreatorRole")]
+        //[Authorize(Policy = "RequireSurveyCreatorRole")]
         public async Task<IActionResult> UpdateQuestion(Guid surveyId, Guid id, UpdateQuestionDto updateQuestionDto)
         {
             if (id != updateQuestionDto.Id)
@@ -171,11 +171,11 @@ namespace SurveySystem.API.Controllers
 
             // Check if the user is the creator or an admin
             var survey = await _surveyRepository.GetByIdAsync(surveyId);
-            if (survey.CreatedByUserId.ToString() != _currentUserService.GetCurrentUserId() &&
-                !_currentUserService.IsInRole("Administrator"))
-            {
-                return Forbid();
-            }
+            //if (survey.CreatedByUserId.ToString() != _currentUserService.GetCurrentUserId() &&
+            //    !_currentUserService.IsInRole("Administrator"))
+            //{
+            //    return Forbid();
+            //}
 
             await _questionRepository.DeleteAsync(question);
 
@@ -190,7 +190,7 @@ namespace SurveySystem.API.Controllers
 
         // DELETE: api/surveys/5/questions/1
         [HttpDelete("{id}")]
-        [Authorize(Policy = "RequireSurveyCreatorRole")]
+        //[Authorize(Policy = "RequireSurveyCreatorRole")]
         public async Task<IActionResult> DeleteQuestion(Guid surveyId, Guid id)
         {
             var question = await _questionRepository.GetQuestionWithOptionsAsync(id);
@@ -203,11 +203,11 @@ namespace SurveySystem.API.Controllers
 
             // Check if the user is the creator or an admin
             var survey = await _surveyRepository.GetByIdAsync(surveyId);
-            if (survey.CreatedByUserId.ToString() != _currentUserService.GetCurrentUserId() &&
-                !_currentUserService.IsInRole("Administrator"))
-            {
-                return Forbid();
-            }
+            //if (survey.CreatedByUserId.ToString() != _currentUserService.GetCurrentUserId() &&
+            //    !_currentUserService.IsInRole("Administrator"))
+            //{
+            //    return Forbid();
+            //}
 
             // Delete the question (repository should handle cascading deletes)
             await _questionRepository.DeleteAsync(question);
@@ -223,7 +223,7 @@ namespace SurveySystem.API.Controllers
 
         // POST: api/surveys/{surveyId}/questions/reorder
         [HttpPost("reorder")]
-        [Authorize(Policy = "RequireSurveyCreatorRole")]
+        //[Authorize(Policy = "RequireSurveyCreatorRole")]
         public async Task<IActionResult> ReorderQuestions(Guid surveyId, [FromBody] List<QuestionOrderDto> questionsOrder)
         {
             var survey = await _surveyRepository.GetByIdAsync(surveyId);
@@ -234,11 +234,11 @@ namespace SurveySystem.API.Controllers
             }
 
             // Check if the user is the creator or an admin
-            if (survey.CreatedByUserId.ToString() != _currentUserService.GetCurrentUserId() &&
-                !_currentUserService.IsInRole("Administrator"))
-            {
-                return Forbid();
-            }
+            //if (survey.CreatedByUserId.ToString() != _currentUserService.GetCurrentUserId() &&
+            //    !_currentUserService.IsInRole("Administrator"))
+            //{
+            //    return Forbid();
+            //}
 
             // Update question display order
             var questionOrders = questionsOrder.Select(q => (q.Id, q.DisplayOrder)).ToList();

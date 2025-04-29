@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace SurveySystem.Web.Pages.Surveys
 {
-    [Authorize(Policy = "RequireSurveyCreatorRole")]
+    //[Authorize(Policy = "RequireSurveyCreatorRole")]
     public class EditModel : PageModel
     {
         private readonly ISurveyService _surveyService;
@@ -28,7 +28,7 @@ namespace SurveySystem.Web.Pages.Surveys
 
         public IEnumerable<QuestionDto> Questions { get; set; } = new List<QuestionDto>();
 
-        public bool IsAdmin => _currentUserService.IsInRole("Administrator");
+        //public bool IsAdmin => _currentUserService.IsInRole("Administrator");
 
         public async Task<IActionResult> OnGetAsync(Guid id)
         {
@@ -40,7 +40,7 @@ namespace SurveySystem.Web.Pages.Surveys
             }
 
             // Check if the user is the creator or an admin
-            if (surveyEntity.CreatedByUserId.ToString() != _currentUserService.GetCurrentUserId() && !IsAdmin)
+            if (surveyEntity.CreatedByUserId.ToString() != _currentUserService.GetCurrentUserId() /*&& !IsAdmin*/)
             {
                 return Forbid();
             }
@@ -109,7 +109,7 @@ namespace SurveySystem.Web.Pages.Surveys
             }
 
             // Check if the user is the creator or an admin
-            if (survey.CreatedByUserId.ToString() != _currentUserService.GetCurrentUserId() && !IsAdmin)
+            if (survey.CreatedByUserId.ToString() != _currentUserService.GetCurrentUserId()/* && !IsAdmin*/)
             {
                 return Forbid();
             }

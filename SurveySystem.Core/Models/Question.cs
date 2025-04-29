@@ -12,7 +12,7 @@
         // Additional properties for specific question types
         public int? MinValue { get; set; }
         public int? MaxValue { get; set; }
-        public string ValidationRegex { get; set; }
+        public string? ValidationRegex { get; set; }
 
         // Navigation properties
         public virtual Survey Survey { get; set; }

@@ -9,7 +9,7 @@ namespace SurveySystem.API.Controllers
 {
     [Route("api/surveys/{surveyId}/questions/{questionId}/responses")]
     [ApiController]
-    [Authorize(Policy = "RequireSurveyCreatorRole")]
+    //[Authorize(Policy = "RequireSurveyCreatorRole")]
     public class TextResponsesController : ControllerBase
     {
         private readonly ISurveyRepository _surveyRepository;
@@ -40,11 +40,11 @@ namespace SurveySystem.API.Controllers
             }
 
             // Check if the user is authorized
-            if (survey.CreatedByUserId.ToString() != _currentUserService.GetCurrentUserId() &&
-                !_currentUserService.IsInRole("Administrator"))
-            {
-                return Forbid();
-            }
+            //if (survey.CreatedByUserId.ToString() != _currentUserService.GetCurrentUserId() &&
+            //    !_currentUserService.IsInRole("Administrator"))
+            //{
+            //    return Forbid();
+            //}
 
             // Check if the question exists and belongs to the survey
             var question = await _questionRepository.GetByIdAsync(questionId);

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SurveySystem.Web.Pages.Surveys
 {
-    [Authorize(Policy = "RequireSurveyCreatorRole")]
+    //[Authorize(Policy = "RequireSurveyCreatorRole")]
     public class CreateModel : PageModel
     {
         private readonly ISurveyService _surveyService;

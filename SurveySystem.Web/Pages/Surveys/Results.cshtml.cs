@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace SurveySystem.Web.Pages.Surveys
 {
-    [Authorize(Policy = "RequireSurveyCreatorRole")]
+    //[Authorize(Policy = "RequireSurveyCreatorRole")]
     public class ResultsModel : PageModel
     {
         private readonly ISurveyRepository _surveyRepository;
@@ -50,9 +50,9 @@ namespace SurveySystem.Web.Pages.Surveys
 
             // Check if the user is the creator or an admin
             bool isCreator = surveyEntity.CreatedByUserId.ToString() == _currentUserService.GetCurrentUserId();
-            bool isAdmin = _currentUserService.IsInRole("Administrator");
+            //bool isAdmin = _currentUserService.IsInRole("Administrator");
 
-            if (!isCreator && !isAdmin)
+            if (!isCreator /*&& !isAdmin*/)
             {
                 return Forbid();
             }

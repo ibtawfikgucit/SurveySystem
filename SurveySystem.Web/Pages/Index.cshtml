@@ -12,10 +12,10 @@
         <p>Get started by browsing available surveys or creating your own.</p>
         <p class="lead">
             <a class="btn btn-primary btn-lg" href="/Surveys" role="button">Browse Surveys</a>
-            @if (User.Identity.IsAuthenticated)
-            {
+            @* @if (User.Identity.IsAuthenticated)
+            { *@
                 <a class="btn btn-success btn-lg ms-2" href="/Surveys/Create" role="button">Create Survey</a>
-            }
+            @* } *@
         </p>
     </div>
 
@@ -43,14 +43,14 @@
                 <div class="card-body">
                     <h5 class="card-title"><i class="bi bi-gear"></i> Administration</h5>
                     <p class="card-text">Manage users, permissions, and system settings.</p>
-                    @if (User.IsInRole("Administrator"))
-                    {
+                    @* @if (User.IsInRole("Administrator"))
+                    { *@
                         <a href="/Admin" class="btn btn-outline-primary">Go to Admin</a>
-                    }
+                    @* }
                     else
                     {
                         <a href="#" class="btn btn-outline-secondary disabled">Admin access required</a>
-                    }
+                    } *@
                 </div>
             </div>
         </div>

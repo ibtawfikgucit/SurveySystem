@@ -25,45 +25,55 @@ options.UseSqlServer(
             );
 builder.Services.AddInfrastructureServices();
 
-
-
-// Add Windows Authentication
-builder.Services.AddAuthentication(options =>
+// Add CORS policy
+builder.Services.AddCors(options =>
 {
-    options.DefaultScheme = "Windows";
-    options.DefaultChallengeScheme = "Windows";
-})
-.AddNegotiate() // Adds Windows Authentication (Kerberos/NTLM)
-// Add JWT bearer for API clients
-.AddJwtBearer("JwtBearer", options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
+    options.AddPolicy("AllowWebApp", policy =>
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]))
-    };
+        policy.WithOrigins("https://localhost:7018", "http://localhost:5203")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
 });
 
+//// Add Windows Authentication
+//builder.Services.AddAuthentication(options =>
+//{
+//    options.DefaultScheme = "Windows";
+//    options.DefaultChallengeScheme = "Windows";
+//})
+//.AddNegotiate() // Adds Windows Authentication (Kerberos/NTLM)
+//// Add JWT bearer for API clients
+//.AddJwtBearer("JwtBearer", options =>
+//{
+//    options.TokenValidationParameters = new TokenValidationParameters
+//    {
+//        ValidateIssuer = true,
+//        ValidateAudience = true,
+//        ValidateLifetime = true,
+//        ValidateIssuerSigningKey = true,
+//        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+//        ValidAudience = builder.Configuration["Jwt:Audience"],
+//        IssuerSigningKey = new SymmetricSecurityKey(
+//            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]))
+//    };
+//});
 
-// Add Authorization
-builder.Services.AddAuthorization(options =>
-{
-    // Policies
-    options.AddPolicy("RequireAdministratorRole", policy =>
-        policy.RequireRole("Domain Admins", "SurveyAdmins"));
 
-    options.AddPolicy("RequireSurveyCreatorRole", policy =>
-        policy.RequireRole("Domain Admins", "SurveyAdmins", "SurveyCreators"));
+//// Add Authorization
+//builder.Services.AddAuthorization(options =>
+//{
+//    // Policies
+//    options.AddPolicy("RequireAdministratorRole", policy =>
+//        policy.RequireRole("Domain Admins", "SurveyAdmins"));
 
-    options.AddPolicy("RequireAuthenticated", policy =>
-        policy.RequireAuthenticatedUser());
-});
+//    options.AddPolicy("RequireSurveyCreatorRole", policy =>
+//        policy.RequireRole("Domain Admins", "SurveyAdmins", "SurveyCreators"));
+
+//    options.AddPolicy("RequireAuthenticated", policy =>
+//        policy.RequireAuthenticatedUser());
+//});
 
 
 // Core services
@@ -86,8 +96,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseCors("AllowWebApp");
+
+//app.UseAuthentication();
+//app.UseAuthorization();
 
 app.MapControllers();
 

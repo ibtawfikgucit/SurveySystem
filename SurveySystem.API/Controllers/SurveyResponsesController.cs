@@ -37,7 +37,7 @@ namespace SurveySystem.API.Controllers
 
         // GET: api/surveys/5/responses
         [HttpGet]
-        [Authorize(Policy = "RequireSurveyCreatorRole")]
+        //[Authorize(Policy = "RequireSurveyCreatorRole")]
         public async Task<ActionResult<IEnumerable<SurveyResponseDto>>> GetResponses(Guid surveyId)
         {
             var survey = await _surveyRepository.GetByIdAsync(surveyId);
@@ -47,11 +47,11 @@ namespace SurveySystem.API.Controllers
             }
 
             // Check if the user is the creator or an admin
-            if (survey.CreatedByUserId.ToString() != _currentUserService.GetCurrentUserId() &&
-                !_currentUserService.IsInRole("Administrator"))
-            {
-                return Forbid();
-            }
+            //if (survey.CreatedByUserId.ToString() != _currentUserService.GetCurrentUserId() &&
+            //    !_currentUserService.IsInRole("Administrator"))
+            //{
+            //    return Forbid();
+            //}
 
             var responses = await _surveyResponseRepository.GetResponsesBySurveyIdAsync(surveyId);
 
@@ -78,7 +78,7 @@ namespace SurveySystem.API.Controllers
 
         // GET: api/surveys/5/responses/1
         [HttpGet("{id}")]
-        [Authorize(Policy = "RequireSurveyCreatorRole")]
+        //[Authorize(Policy = "RequireSurveyCreatorRole")]
         public async Task<ActionResult<SurveyResponseDto>> GetResponse(Guid surveyId, Guid id)
         {
             var survey = await _surveyRepository.GetByIdAsync(surveyId);
@@ -88,11 +88,11 @@ namespace SurveySystem.API.Controllers
             }
 
             // Check if the user is the creator or an admin
-            if (survey.CreatedByUserId.ToString() != _currentUserService.GetCurrentUserId() &&
-                !_currentUserService.IsInRole("Administrator"))
-            {
-                return Forbid();
-            }
+            //if (survey.CreatedByUserId.ToString() != _currentUserService.GetCurrentUserId() &&
+            //    !_currentUserService.IsInRole("Administrator"))
+            //{
+            //    return Forbid();
+            //}
 
             var response = await _surveyResponseRepository.GetResponseWithAnswersAsync(id);
 
@@ -124,7 +124,7 @@ namespace SurveySystem.API.Controllers
 
         // DELETE: api/surveys/5/responses/1
         [HttpDelete("{id}")]
-        [Authorize(Policy = "RequireAdministratorRole")]
+        //[Authorize(Policy = "RequireAdministratorRole")]
         public async Task<IActionResult> DeleteResponse(Guid surveyId, Guid id)
         {
             var response = await _surveyResponseRepository.GetByIdAsync(id);

@@ -42,7 +42,7 @@ namespace SurveySystem.Shared.DTOs
 
         public int? MaxValue { get; set; }
 
-        public string ValidationRegex { get; set; }
+        public string? ValidationRegex { get; set; }
 
         public List<CreateQuestionOptionDto> Options { get; set; }
     }

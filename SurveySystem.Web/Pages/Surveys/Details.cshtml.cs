@@ -35,8 +35,8 @@ namespace SurveySystem.Web.Pages.Surveys
 
             // Check if survey is published or if the user is the creator or an admin
             bool isCreator = surveyEntity.CreatedByUserId.ToString() == _currentUserService.GetCurrentUserId();
-            bool isAdmin = _currentUserService.IsInRole("Administrator");
-            CanEdit = isCreator || isAdmin;
+            //bool isAdmin = _currentUserService.IsInRole("Administrator");
+            CanEdit = isCreator /*|| isAdmin*/;
 
             if (!surveyEntity.IsPublished && !CanEdit)
             {

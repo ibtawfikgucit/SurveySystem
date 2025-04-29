@@ -28,14 +28,14 @@
                         <li class="nav-item">
                             <a class="nav-link text-light" asp-area="" asp-page="/Analytics/Index">Analytics</a>
                         </li>
-                        @if (User.IsInRole("Administrator"))
-                        {
+                        @* @if (User.IsInRole("Administrator"))
+                        { *@
                             <li class="nav-item">
                                 <a class="nav-link text-light" asp-area="" asp-page="/Admin/Index">Admin</a>
                             </li>
-                        }
+                        @* } *@
                     </ul>
-                    <partial name="_LoginPartial" />
+                    @* <partial name="_LoginPartial" /> *@
                 </div>
             </div>
         </nav>

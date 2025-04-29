@@ -68,10 +68,10 @@ namespace SurveySystem.Web.Pages.Surveys
             }
 
             // Check authentication requirement
-            if (surveyEntity.RequiresAuthentication && !User.Identity.IsAuthenticated)
-            {
-                return RedirectToPage("/Account/Login", new { returnUrl = $"/Surveys/Answer/{id}" });
-            }
+            //if (surveyEntity.RequiresAuthentication && !User.Identity.IsAuthenticated)
+            //{
+            //    return RedirectToPage("/Account/Login", new { returnUrl = $"/Surveys/Answer/{id}" });
+            //}
 
             SurveyId = id;
             StartTime = DateTime.UtcNow;
@@ -134,10 +134,10 @@ namespace SurveySystem.Web.Pages.Surveys
             }
 
             // Check authentication requirement
-            if (surveyEntity.RequiresAuthentication && !User.Identity.IsAuthenticated)
-            {
-                return RedirectToPage("/Account/Login", new { returnUrl = $"/Surveys/Answer/{SurveyId}" });
-            }
+            //if (surveyEntity.RequiresAuthentication && !User.Identity.IsAuthenticated)
+            //{
+            //    return RedirectToPage("/Account/Login", new { returnUrl = $"/Surveys/Answer/{SurveyId}" });
+            //}
 
             // Validate required questions
             var requiredQuestionIds = surveyEntity.Questions
@@ -176,18 +176,18 @@ namespace SurveySystem.Web.Pages.Surveys
             };
 
             // Set respondent info
-            if (User.Identity.IsAuthenticated)
-            {
+            //if (User.Identity.IsAuthenticated)
+            //{
                 var userId = _currentUserService.GetCurrentUserId();
                 if (Guid.TryParse(userId, out Guid userGuid))
                 {
                     response.RespondentId = userGuid;
                 }
-            }
-            else if (!string.IsNullOrEmpty(RespondentEmail))
-            {
-                response.RespondentEmail = RespondentEmail;
-            }
+            //}
+            //else if (!string.IsNullOrEmpty(RespondentEmail))
+            //{
+            //    response.RespondentEmail = RespondentEmail;
+            //}
 
             // Add question responses
             response.QuestionResponses = new List<QuestionResponse>();

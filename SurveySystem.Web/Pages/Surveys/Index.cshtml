@@ -7,18 +7,18 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Surveys</h1>
-        @if (User.Identity.IsAuthenticated)
-        {
+        @* @if (User.Identity.IsAuthenticated) *@
+        @* { *@
             <a asp-page="Create" class="btn btn-primary">
                 <i class="bi bi-plus-circle"></i> Create New Survey
             </a>
-        }
+        @* } *@
     </div>
 
     @if (!Model.Surveys.Any())
     {
         <div class="alert alert-info">
-            No surveys found. @(User.Identity.IsAuthenticated ? "Create your first survey!" : "Please sign in to create a survey.")
+            No surveys found. @* @(User.Identity.IsAuthenticated ? "Create your first survey!" : "Please sign in to create a survey.") *@
         </div>
     }
     else

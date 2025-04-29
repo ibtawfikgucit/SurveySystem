@@ -12,7 +12,7 @@ namespace SurveySystem.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class SurveysController : ControllerBase
     {
         private readonly ISurveyService _surveyService;
@@ -41,26 +41,26 @@ namespace SurveySystem.API.Controllers
         {
             IEnumerable<Survey> surveys;
             var userId = _currentUserService.GetCurrentUserId();
-            var isAdmin = _currentUserService.IsInRole("Administrator");
+            //var isAdmin = _currentUserService.IsInRole("Administrator");
 
-            if (isAdmin)
-            {
+            //if (isAdmin)
+            //{
                 // Admins can see all surveys
                 surveys = await _surveyService.GetAllSurveysAsync();
-            }
-            else if (Guid.TryParse(userId, out Guid userGuid))
-            {
-                // Normal users see published surveys + their own
-                var allSurveys = await _surveyService.GetAllSurveysAsync();
-                surveys = allSurveys.Where(s =>
-                    s.IsPublished || s.CreatedByUserId == userGuid);
-            }
-            else
-            {
-                // Unauthenticated users only see published surveys
-                var allSurveys = await _surveyService.GetAllSurveysAsync();
-                surveys = allSurveys.Where(s => s.IsPublished);
-            }
+            //}
+            //else if (Guid.TryParse(userId, out Guid userGuid))
+            //{
+            //    // Normal users see published surveys + their own
+            //    var allSurveys = await _surveyService.GetAllSurveysAsync();
+            //    surveys = allSurveys.Where(s =>
+            //        s.IsPublished || s.CreatedByUserId == userGuid);
+            //}
+            //else
+            //{
+            //    // Unauthenticated users only see published surveys
+            //    var allSurveys = await _surveyService.GetAllSurveysAsync();
+            //    surveys = allSurveys.Where(s => s.IsPublished);
+            //}
 
             var surveyDtos = surveys.Select(s => new SurveyDto
             {
@@ -90,10 +90,10 @@ namespace SurveySystem.API.Controllers
 
             // Check access permissions for non-published surveys
             var userId = _currentUserService.GetCurrentUserId();
-            var isAdmin = _currentUserService.IsInRole("Administrator");
+            //var isAdmin = _currentUserService.IsInRole("Administrator");
 
             if (!survey.IsPublished &&
-                !isAdmin &&
+                //!isAdmin &&
                 survey.CreatedByUserId.ToString() != userId)
             {
                 return Forbid();
@@ -134,7 +134,7 @@ namespace SurveySystem.API.Controllers
 
         // POST: api/surveys
         [HttpPost]
-        [Authorize(Policy = "RequireSurveyCreatorRole")]
+        //[Authorize(Policy = "RequireSurveyCreatorRole")]
         public async Task<ActionResult<SurveyDto>> CreateSurvey(CreateSurveyDto createSurveyDto)
         {
             var userId = _currentUserService.GetCurrentUserId();
@@ -173,7 +173,7 @@ namespace SurveySystem.API.Controllers
 
         // PUT: api/surveys/5
         [HttpPut("{id}")]
-        [Authorize(Policy = "RequireSurveyCreatorRole")]
+        //[Authorize(Policy = "RequireSurveyCreatorRole")]
         public async Task<IActionResult> UpdateSurvey(Guid id, UpdateSurveyDto updateSurveyDto)
         {
             if (id != updateSurveyDto.Id)
@@ -190,9 +190,9 @@ namespace SurveySystem.API.Controllers
 
             // Check user permissions
             var userId = _currentUserService.GetCurrentUserId();
-            var isAdmin = _currentUserService.IsInRole("Administrator");
+            //var isAdmin = _currentUserService.IsInRole("Administrator");
 
-            if (!isAdmin && survey.CreatedByUserId.ToString() != userId)
+            if (/*!isAdmin && */survey.CreatedByUserId.ToString() != userId)
             {
                 return Forbid("You don't have permission to update this survey");
             }
@@ -214,7 +214,7 @@ namespace SurveySystem.API.Controllers
 
         // DELETE: api/surveys/5
         [HttpDelete("{id}")]
-        [Authorize(Policy = "RequireAdministratorRole")]
+        //[Authorize(Policy = "RequireAdministratorRole")]
         public async Task<IActionResult> DeleteSurvey(Guid id)
         {
             var survey = await _surveyService.GetSurveyByIdAsync(id);
@@ -231,7 +231,7 @@ namespace SurveySystem.API.Controllers
 
         // GET: api/surveys/5/stats
         [HttpGet("{id}/stats")]
-        [Authorize(Policy = "RequireSurveyCreatorRole")]
+        //[Authorize(Policy = "RequireSurveyCreatorRole")]
         public async Task<ActionResult<SurveyStatsDto>> GetSurveyStats(Guid id)
         {
             var survey = await _surveyRepository.GetByIdAsync(id);
@@ -243,9 +243,9 @@ namespace SurveySystem.API.Controllers
 
             // Check user permissions
             var userId = _currentUserService.GetCurrentUserId();
-            var isAdmin = _currentUserService.IsInRole("Administrator");
+            //var isAdmin = _currentUserService.IsInRole("Administrator");
 
-            if (!isAdmin && survey.CreatedByUserId.ToString() != userId)
+            if (/*!isAdmin && */survey.CreatedByUserId.ToString() != userId)
             {
                 return Forbid("You don't have permission to view this survey's stats");
             }

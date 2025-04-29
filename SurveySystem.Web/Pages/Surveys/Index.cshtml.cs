@@ -36,16 +36,16 @@ namespace SurveySystem.Web.Pages.Surveys
             });
 
             // If not an admin, only show published surveys and own drafts
-            if (!_currentUserService.IsInRole("Administrator"))
-            {
-                string username = _currentUserService.GetCurrentUsername();
-                Surveys = Surveys.Where(s => s.IsPublished || s.CreatedBy == username);
-            }
+            //if (!_currentUserService.IsInRole("Administrator"))
+            //{
+            //    string username = _currentUserService.GetCurrentUsername();
+            //    Surveys = Surveys.Where(s => s.IsPublished || s.CreatedBy == username);
+            //}
         }
 
         public bool IsOwnerOrAdmin(string createdBy)
         {
-            return _currentUserService.IsInRole("Administrator") ||
+            return //_currentUserService.IsInRole("Administrator") ||
                    createdBy == _currentUserService.GetCurrentUsername();
         }
     }

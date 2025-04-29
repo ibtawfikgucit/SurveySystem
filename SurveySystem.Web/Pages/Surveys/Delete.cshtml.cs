@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SurveySystem.Web.Pages.Surveys
 {
-    [Authorize(Policy = "RequireAdministratorRole")]
+    //[Authorize(Policy = "RequireAdministratorRole")]
     public class DeleteModel : PageModel
     {
         private readonly ISurveyService _surveyService;

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace SurveySystem.Web.Pages.Admin
 {
-    [Authorize(Policy = "RequireAdministratorRole")]
+    //[Authorize(Policy = "RequireAdministratorRole")]
     public class IndexModel : PageModel
     {
         private readonly ISurveyRepository _surveyRepository;

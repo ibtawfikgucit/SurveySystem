@@ -147,12 +147,12 @@
                         <a href="#" class="btn btn-outline-success" id="copySurveyLink">
                             <i class="bi bi-link-45deg"></i> Copy Survey Link
                         </a>
-                        @if (Model.IsAdmin)
-                        {
+                        @* @if (Model.IsAdmin) *@
+                        @* { *@
                             <a asp-page="Delete" asp-route-id="@Model.Survey.Id" class="btn btn-outline-danger">
                                 <i class="bi bi-trash"></i> Delete Survey
                             </a>
-                        }
+                        @* } *@
                     </div>
                 </div>
             </div>
@@ -347,10 +347,10 @@
                         });
                     });
                 }
-
+                console.log(question);
                 // Save via API
                 $.ajax({
-                    url: '/api/surveys/' + $('#surveyId').val() + '/questions',
+                    url: 'https://localhost:7165/api/surveys/' + $('#surveyId').val() + '/questions',
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(question),
@@ -359,6 +359,7 @@
                         location.reload();
                     },
                     error: function (error) {
+                        console.log(error)
                         alert('Error saving question: ' + error.responseText);
                     }
                 });
@@ -370,7 +371,7 @@
 
                 // Get question data via API
                 $.ajax({
-                    url: '/api/surveys/' + $('#surveyId').val() + '/questions/' + questionId,
+                    url: 'https://localhost:7165/api/surveys/' + $('#surveyId').val() + '/questions/' + questionId,
                     type: 'GET',
                     success: function (question) {
                         $('#editQuestionId').val(question.id);
@@ -454,7 +455,7 @@
 
                 // Update via API
                 $.ajax({
-                    url: '/api/surveys/' + $('#surveyId').val() + '/questions/' + questionId,
+                    url: 'https://localhost:7165/api/surveys/' + $('#surveyId').val() + '/questions/' + questionId,
                     type: 'PUT',
                     contentType: 'application/json',
                     data: JSON.stringify(question),

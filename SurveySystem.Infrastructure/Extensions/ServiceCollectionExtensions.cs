@@ -1,10 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using SurveySystem.Core.Interfaces;
-using SurveySystem.Core.Services;
-using SurveySystem.Infrastructure.Auth;
-using SurveySystem.Infrastructure.Data;
+//using SurveySystem.Core.Services;
+//using SurveySystem.Infrastructure.Auth;
 using SurveySystem.Infrastructure.Repositories;
 using SurveySystem.Infrastructure.Services;
 
@@ -33,9 +30,9 @@ namespace SurveySystem.Infrastructure.Extensions
             // Register services
             services.AddScoped<ISurveyService, SurveyService>();
             services.AddScoped<IAuditService, AuditService>();
-            services.AddScoped<IJwtTokenService, JwtTokenService>();
+            //services.AddScoped<IJwtTokenService, JwtTokenService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
-            services.AddScoped< IActiveDirectoryService , ActiveDirectoryService>();
+            //services.AddScoped< IActiveDirectoryService , ActiveDirectoryService>();
             return services;
         }
     }
